@@ -39,7 +39,6 @@ def main():
             
         #Se chegamos até aqui, a comunicação foi aberta com sucesso. Faça um print para informar.
         print("Abriu a comunicação")
-        tempo_inicial = time.time()
                   
         #aqui você deverá gerar os dados a serem transmitidos. 
         #seus dados a serem transmitidos são um array bytes a serem transmitidos. Gere esta lista com o 
@@ -94,20 +93,34 @@ def main():
         #Agora vamos iniciar a recepção dos dados. Se algo chegou ao RX, deve estar automaticamente guardado
         #Observe o que faz a rotina dentro do thread RX
         #print um aviso de que a recepção vai começar.
+
         print("Recepção de dados iniciada")
+        # rxBuffer, nRx = com1.getData(1)
+        timeout = 5
+        rx = RX(fisica)
+        tempo_inicial = time.time()
+        tempo_duracao = 0
+        while com1.rx.getBufferLen() < 1:
+            #print(com1.rx.getBufferLen())
+            tempo_fim = time.time()
+            tempo_duracao = tempo_fim - tempo_inicial
+
+            if tempo_fim - tempo_inicial > timeout:
+                print("Time out!")
+                com1.disable()
+                break
+            com1.rx.getBufferLen()
+
         rxBuffer, nRx = com1.getData(1)
         comandos_recebidos = int.from_bytes(rxBuffer, byteorder='big')
-        tempo_fim = time.time()
-        tempo_duracao = tempo_fim - tempo_inicial
+        print(comandos_recebidos)
         print("Tempo de duração da comunicação: {}" .format(tempo_duracao))
-        if tempo_duracao < 5:
-            if comandos_recebidos == n_comandos:
-                print("recebeu {} comandos! A quantidade de comandos foi igual." .format(comandos_recebidos))
-            else:
-                print("Ops! recebeu {} comandos! A quantidade de comandos foi diferente do esperado." .format(comandos_recebidos))
-        else:
-            print("Time out!")
 
+        if comandos_recebidos == n_comandos:
+            print("recebeu {} comandos! A quantidade de comandos foi igual." .format(comandos_recebidos))
+        else:
+            print("Ops! recebeu {} comandos! A quantidade de comandos foi diferente do esperado." .format(comandos_recebidos))
+        
         #Será que todos os bytes enviados estão realmente guardadas? Será que conseguimos verificar?
         #Veja o que faz a funcao do enlaceRX  getBufferLen
       
@@ -137,4 +150,4 @@ def main():
 
     #so roda o main quando for executado do terminal ... se for chamado dentro de outro modulo nao roda
 if __name__ == "__main__":
-    main()
+    main()
